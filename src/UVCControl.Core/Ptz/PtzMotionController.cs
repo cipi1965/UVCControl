@@ -152,6 +152,7 @@ public sealed class PtzMotionController : IAsyncDisposable
 
     private async Task RunAsync(CancellationToken ct)
     {
+        TaskCompletionSource<bool>? arrived = null;
         try
         {
             using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1 / Math.Max(_options.TickRate, 1)));
@@ -167,7 +168,7 @@ public sealed class PtzMotionController : IAsyncDisposable
                 List<(UvcControl Control, byte[] Payload)> writes;
                 lock (_lock)
                 {
-                    var active = Step(dt);
+                    var active = Step(dt, out arrived);
                     writes = CollectWrites();
                     idle = active || writes.Count > 0 ? 0 : idle + dt;
                     if (idle >= IdleSeconds)
@@ -180,6 +181,9 @@ public sealed class PtzMotionController : IAsyncDisposable
                 foreach (var (control, payload) in writes)
                     await control.SendAsync(payload).ConfigureAwait(false);
                 if (writes.Count > 0) Moved?.Invoke(this, EventArgs.Empty);
+                // Only now has the final position reached the camera.
+                arrived?.TrySetResult(true);
+                arrived = null;
             }
         }
         catch (OperationCanceledException)
@@ -192,6 +196,7 @@ public sealed class PtzMotionController : IAsyncDisposable
         }
         finally
         {
+            arrived?.TrySetResult(false);
             lock (_lock)
             {
                 if (_running) Finish();
@@ -200,16 +205,20 @@ public sealed class PtzMotionController : IAsyncDisposable
         Moved?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Advances jogging or the preset move by <paramref name="dt"/>. Returns false when nothing moves.</summary>
-    private bool Step(double dt)
+    /// <summary>
+    /// Advances jogging or the preset move by <paramref name="dt"/>. Returns false when nothing moves.
+    /// <paramref name="arrived"/> is the finished move's completion, to be set once its last position is sent.
+    /// </summary>
+    private bool Step(double dt, out TaskCompletionSource<bool>? arrived)
     {
+        arrived = null;
         if (_move is { } move)
         {
             if (!move.IsStarted) move.Begin(_position, _rates, _options.MinimumMoveDuration.TotalSeconds);
             if (move.Advance(dt, _position))
             {
                 _move = null;
-                _moveDone?.TrySetResult(true);
+                arrived = _moveDone;
                 _moveDone = null;
             }
             return true;
