@@ -27,6 +27,7 @@ public sealed partial class PtzViewModel : ViewModelBase, IAsyncDisposable
     private readonly ISettingsStore _settings;
     private readonly string _cameraKey;
     private double _padPan, _padTilt, _zoomInput, _focusInput;
+    private bool _syncing;
 
     public PtzViewModel(UvcDevice device, IPresetStore presetStore, ISettingsStore settings, IOptions<PtzOptions> options,
                         ILogger<PtzMotionController> logger)
@@ -52,6 +53,7 @@ public sealed partial class PtzViewModel : ViewModelBase, IAsyncDisposable
     public bool HasPanTilt => HasPan || HasTilt;
     public bool HasZoom => _axes.Zoom is not null;
     public bool HasFocus => _axes.Focus is not null;
+    public bool HasAutofocus => _axes.Focus is not null && _axes.Autofocus is not null;
     public bool HasAnyAxis => !_axes.IsEmpty;
     public bool HasNoAxis => _axes.IsEmpty;
 
@@ -78,6 +80,23 @@ public sealed partial class PtzViewModel : ViewModelBase, IAsyncDisposable
 
     [ObservableProperty]
     public partial bool IsMoving { get; private set; }
+
+    // MARK: Autofocus
+
+    /// <summary>
+    /// The camera's autofocus. Focusing by hand or recalling a preset with focus turns it off
+    /// (see <see cref="PtzMotionController"/>); <see cref="Sync"/> then clears the toggle.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsAutofocusOn { get; set; }
+
+    partial void OnIsAutofocusOnChanged(bool value)
+    {
+        if (_syncing || _axes.Autofocus is not { } af) return;
+        var payload = new byte[af.Length];
+        payload[0] = value ? (byte)1 : (byte)0;
+        _ = af.SendAsync(payload);
+    }
 
     // MARK: Speeds (1–100 %)
 
@@ -294,6 +313,12 @@ public sealed partial class PtzViewModel : ViewModelBase, IAsyncDisposable
             ZoomText = Format(zoom, zoom.Current);
         }
         if (_axes.Focus is { } focus) FocusText = Format(focus, focus.Current);
+        if (_axes.Autofocus is { } af)
+        {
+            _syncing = true;
+            IsAutofocusOn = af.Current.Any(b => b != 0);
+            _syncing = false;
+        }
         IsMoving = _motion.IsMoving;
     }
 

@@ -123,6 +123,9 @@
                         <controls:HoldButton Classes="rocker" Content="Near" CommandParameter="-1"
                                              PressCommand="{Binding PressFocusCommand}" ReleaseCommand="{Binding ReleaseFocusCommand}"
                                              ToolTip.Tip="Hold to focus nearer (turns autofocus off)" />
+                        <CheckBox Content="Autofocus" IsChecked="{Binding IsAutofocusOn}" IsVisible="{Binding HasAutofocus}"
+                                  HorizontalAlignment="Center"
+                                  ToolTip.Tip="Turns off when you focus by hand or recall a preset with focus" />
                     </StackPanel>
                 </Border>
             </StackPanel>
