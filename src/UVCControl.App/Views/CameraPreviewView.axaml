@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UVCControl.App.ViewModels"
+             xmlns:svc="using:UVCControl.App.Services"
+             xmlns:sys="using:System"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="340"
+             x:Class="UVCControl.App.Views.CameraPreviewView"
+             x:DataType="vm:CameraPreviewViewModel">
+
+    <Grid RowDefinitions="*,Auto" Background="Black">
+        <Image Source="{Binding Frame}" Stretch="Uniform" />
+        <TextBlock Text="{Binding Message}" IsVisible="{Binding HasMessage}" Foreground="#A0A0A8"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Margin="20" />
+
+        <Border Grid.Row="1" Background="{DynamicResource BarBackground}" Padding="12,6" IsVisible="{Binding HasFormats}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Format" VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding SelectedFormat}" Width="260">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="svc:CameraFormat">
+                            <TextBlock Text="{Binding Label}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Frame Rate" VerticalAlignment="Center" Margin="8,0,0,0" />
+                <ComboBox ItemsSource="{Binding FrameRates}" SelectedItem="{Binding SelectedFrameRate}" Width="120">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="sys:Double">
+                            <TextBlock Text="{Binding StringFormat='{}{0:0.##} fps'}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

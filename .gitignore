@@ -1,0 +1,74 @@
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.binlog
+
+# Local publish / packaging output (scripts/build-macos-app.sh, CI)
+/build/
+/artifacts/
+/publish/
+*.nupkg
+*.snupkg
+
+# Test results & coverage
+[Tt]est[Rr]esult*/
+*.trx
+coverage/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+
+# NuGet
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+*.DotSettings.user
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Avalonia
+.avalonia-build-tasks/
+
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# Misc
+*.swp
+*.tmp
+*.log
+.env
+.env.local

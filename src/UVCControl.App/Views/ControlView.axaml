@@ -1,0 +1,159 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UVCControl.App.ViewModels"
+             xmlns:ed="using:UVCControl.App.ViewModels.Editors"
+             xmlns:core="using:UVCControl.Core.Controls"
+             xmlns:controls="using:UVCControl.App.Controls"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="80"
+             x:Class="UVCControl.App.Views.ControlView"
+             x:DataType="vm:ControlViewModel">
+
+    <UserControl.DataTemplates>
+        <!-- Absolute values: one slider per field -->
+        <DataTemplate DataType="ed:SlidersEditorViewModel">
+            <ItemsControl ItemsSource="{Binding Fields}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="ed:FieldSliderViewModel">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                            <TextBlock Classes="secondary" Text="{Binding Name}" Width="90" VerticalAlignment="Center"
+                                       IsVisible="{Binding ShowLabel}" />
+                            <Grid Grid.Column="1" ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding HasRange}">
+                                <TextBlock Classes="caption secondary" Text="{Binding MinimumLabel}" VerticalAlignment="Center" />
+                                <!-- Minimum/Maximum come before Value so the value is never clamped to a default range. -->
+                                <Slider Grid.Column="1" Margin="8,0"
+                                        Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
+                                        Value="{Binding SliderValue}"
+                                        controls:SliderEditTracker.IsEditing="{Binding IsEditing, Mode=TwoWay}" />
+                                <TextBlock Grid.Column="2" Classes="caption secondary" Text="{Binding MaximumLabel}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <TextBox Grid.Column="2" Width="90" Text="{Binding Text}" TextAlignment="Right"
+                                     VerticalAlignment="Center" Margin="8,0,0,0">
+                                <TextBox.KeyBindings>
+                                    <KeyBinding Gesture="Enter" Command="{Binding CommitTextCommand}" />
+                                </TextBox.KeyBindings>
+                            </TextBox>
+                            <TextBlock Grid.Column="3" Classes="caption secondary" Text="{Binding UnitText}" Width="70"
+                                       Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
+
+        <DataTemplate DataType="ed:ToggleEditorViewModel">
+            <ToggleSwitch IsChecked="{Binding IsOn}" OnContent="Enabled" OffContent="Disabled" />
+        </DataTemplate>
+
+        <DataTemplate DataType="ed:MenuEditorViewModel">
+            <ComboBox ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}" MinWidth="220">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="core:MenuOption">
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </DataTemplate>
+
+        <!-- Relative values: move while a button is held -->
+        <DataTemplate DataType="ed:ContinuousEditorViewModel">
+            <StackPanel Spacing="6">
+                <ItemsControl ItemsSource="{Binding Axes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="ed:AxisViewModel">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Classes="secondary" Text="{Binding Name}" Width="90" VerticalAlignment="Center" />
+                                <controls:HoldButton Content="−" Width="40" HorizontalContentAlignment="Center"
+                                                     PressCommand="{Binding PressMinusCommand}"
+                                                     ReleaseCommand="{Binding ReleaseCommand}"
+                                                     ToolTip.Tip="Hold to move" />
+                                <controls:HoldButton Content="+" Width="40" HorizontalContentAlignment="Center"
+                                                     PressCommand="{Binding PressPlusCommand}"
+                                                     ReleaseCommand="{Binding ReleaseCommand}"
+                                                     ToolTip.Tip="Hold to move" />
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,0,0,0"
+                                            IsVisible="{Binding Speed, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Classes="secondary" Text="Speed" VerticalAlignment="Center"
+                                               IsVisible="{Binding Speed.HasRange, FallbackValue=False}" />
+                                    <Slider Width="160" Minimum="{Binding Speed.Minimum, FallbackValue=1}"
+                                            Maximum="{Binding Speed.Maximum, FallbackValue=1}"
+                                            Value="{Binding Speed.Value, FallbackValue=1}"
+                                            TickFrequency="1" IsSnapToTickEnabled="True"
+                                            IsVisible="{Binding Speed.HasRange, FallbackValue=False}" />
+                                    <TextBlock Classes="caption secondary" Text="{Binding Speed.SpeedText, FallbackValue=''}"
+                                               VerticalAlignment="Center" MinWidth="30" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Flags}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="ed:FlagViewModel">
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsOn}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Exposure/iris relative: each click steps once -->
+        <DataTemplate DataType="ed:StepEditorViewModel">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="− Decrease" Command="{Binding DecreaseCommand}" />
+                <Button Content="Default" Command="{Binding DefaultCommand}" />
+                <Button Content="+ Increase" Command="{Binding IncreaseCommand}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Extension units: hex editor -->
+        <DataTemplate DataType="ed:RawEditorViewModel">
+            <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <TextBox Classes="mono" Text="{Binding HexText}" PlaceholderText="Hex bytes"
+                             TextWrapping="Wrap" MaxHeight="96" />
+                    <Button Grid.Column="1" Content="Read" Command="{Binding ReadCommand}" Margin="6,0,0,0"
+                            VerticalAlignment="Top" />
+                    <Button Grid.Column="2" Content="Write" Command="{Binding WriteCommand}" Margin="6,0,0,0"
+                            VerticalAlignment="Top" IsEnabled="{Binding CanWrite}" />
+                </Grid>
+                <SelectableTextBlock Classes="caption secondary mono" Text="{Binding Details}" />
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
+    <StackPanel Spacing="6" Margin="0,8">
+        <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="{Binding Name}" FontWeight="Medium" VerticalAlignment="Center" />
+                <Border Classes="badge" Background="#2EF59E0B" IsVisible="{Binding IsNotAdvertised}"
+                        ToolTip.Tip="The device descriptor doesn't list this control, but the camera answers it.">
+                    <TextBlock Text="not advertised" Foreground="#D97706" />
+                </Border>
+                <Border Classes="badge" Background="#2E3B82F6" IsVisible="{Binding IsAuto}">
+                    <TextBlock Text="auto" Foreground="#3B82F6" />
+                </Border>
+                <Border Classes="badge" Background="#2E8E8E93" IsVisible="{Binding IsReadOnly}">
+                    <TextBlock Text="read-only" Foreground="#8E8E93" />
+                </Border>
+            </StackPanel>
+            <Button Grid.Column="1" Content="↺" Command="{Binding ResetCommand}" IsVisible="{Binding CanReset}"
+                    Padding="8,2" Background="Transparent" ToolTip.Tip="Reset to default" />
+        </Grid>
+        <ContentControl Content="{Binding Editor}" IsEnabled="{Binding IsEditable}" />
+        <TextBlock Classes="caption error" Text="{Binding Error}"
+                   IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+</UserControl>

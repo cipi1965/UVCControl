@@ -1,0 +1,224 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UVCControl.App.ViewModels"
+             xmlns:controls="using:UVCControl.App.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="UVCControl.App.Views.PtzView"
+             x:DataType="vm:PtzViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="controls|HoldButton.pad">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="controls|HoldButton.rocker">
+            <Setter Property="Width" Value="96" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.preset">
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="12,6" />
+        </Style>
+        <Style Selector="Button.preset.recalling">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlHighlightAccentBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBlock.readout">
+            <Setter Property="FontFamily" Value="{DynamicResource MonospaceFont}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel Spacing="16">
+        <Border Classes="card" IsVisible="{Binding HasNoAxis}">
+            <TextBlock Classes="secondary" TextWrapping="Wrap"
+                       Text="This camera has no absolute Pan/Tilt, Zoom or Focus control. The Advanced tab still lists everything it answers." />
+        </Border>
+
+        <WrapPanel IsVisible="{Binding HasAnyAxis}" ItemSpacing="16" LineSpacing="16">
+            <!-- Pan / Tilt -->
+            <StackPanel Spacing="6" IsVisible="{Binding HasPanTilt}">
+                <TextBlock Classes="sectionHeader" Text="PAN / TILT" Margin="4,0" />
+                <Border Classes="card">
+                    <StackPanel Spacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <controls:VirtualJoystick Width="160" Height="160"
+                                                      X="{Binding JoystickX}" Y="{Binding JoystickY}"
+                                                      Background="{DynamicResource PageBackground}"
+                                                      BorderBrush="{DynamicResource CardBorder}"
+                                                      KnobBrush="{DynamicResource SystemControlHighlightAccentBrush}"
+                                                      ToolTip.Tip="Drag to pan and tilt; farther from the centre is faster" />
+                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto"
+                                  VerticalAlignment="Center" RowSpacing="4" ColumnSpacing="4">
+                                <controls:HoldButton Grid.Row="0" Grid.Column="0" Classes="pad" Content="↖" CommandParameter="-1,1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="0" Grid.Column="1" Classes="pad" Content="↑" CommandParameter="0,1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="0" Grid.Column="2" Classes="pad" Content="↗" CommandParameter="1,1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="1" Grid.Column="0" Classes="pad" Content="←" CommandParameter="-1,0"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <Button Grid.Row="1" Grid.Column="1" Width="44" Height="44" Padding="0" FontSize="16"
+                                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                        Content="⌂" Command="{Binding HomeCommand}"
+                                        ToolTip.Tip="Home: ease back to the camera's default position" />
+                                <controls:HoldButton Grid.Row="1" Grid.Column="2" Classes="pad" Content="→" CommandParameter="1,0"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="2" Grid.Column="0" Classes="pad" Content="↙" CommandParameter="-1,-1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="2" Grid.Column="1" Classes="pad" Content="↓" CommandParameter="0,-1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                                <controls:HoldButton Grid.Row="2" Grid.Column="2" Classes="pad" Content="↘" CommandParameter="1,-1"
+                                                     PressCommand="{Binding PressDirectionCommand}" ReleaseCommand="{Binding ReleaseDirectionCommand}" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <TextBlock Classes="readout secondary" IsVisible="{Binding HasPan}">
+                                <Run Text="Pan" /> <Run Text="{Binding PanText}" />
+                            </TextBlock>
+                            <TextBlock Classes="readout secondary" IsVisible="{Binding HasTilt}">
+                                <Run Text="Tilt" /> <Run Text="{Binding TiltText}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Zoom / Focus -->
+            <StackPanel Spacing="6" IsVisible="{Binding HasZoom}">
+                <TextBlock Classes="sectionHeader" Text="ZOOM" Margin="4,0" />
+                <Border Classes="card">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <controls:HoldButton Classes="rocker" Content="Tele +" CommandParameter="1"
+                                             PressCommand="{Binding PressZoomCommand}" ReleaseCommand="{Binding ReleaseZoomCommand}"
+                                             ToolTip.Tip="Hold to zoom in" />
+                        <ProgressBar Minimum="0" Maximum="1" Value="{Binding ZoomFraction}" Width="96" MinWidth="96" />
+                        <TextBlock Classes="readout secondary" Text="{Binding ZoomText}" HorizontalAlignment="Center" />
+                        <controls:HoldButton Classes="rocker" Content="Wide −" CommandParameter="-1"
+                                             PressCommand="{Binding PressZoomCommand}" ReleaseCommand="{Binding ReleaseZoomCommand}"
+                                             ToolTip.Tip="Hold to zoom out" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Spacing="6" IsVisible="{Binding HasFocus}">
+                <TextBlock Classes="sectionHeader" Text="FOCUS" Margin="4,0" />
+                <Border Classes="card">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <controls:HoldButton Classes="rocker" Content="Far" CommandParameter="1"
+                                             PressCommand="{Binding PressFocusCommand}" ReleaseCommand="{Binding ReleaseFocusCommand}"
+                                             ToolTip.Tip="Hold to focus farther (turns autofocus off)" />
+                        <TextBlock Classes="readout secondary" Text="{Binding FocusText}" HorizontalAlignment="Center" />
+                        <controls:HoldButton Classes="rocker" Content="Near" CommandParameter="-1"
+                                             PressCommand="{Binding PressFocusCommand}" ReleaseCommand="{Binding ReleaseFocusCommand}"
+                                             ToolTip.Tip="Hold to focus nearer (turns autofocus off)" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Speeds -->
+            <StackPanel Spacing="6">
+                <TextBlock Classes="sectionHeader" Text="SPEED" Margin="4,0" />
+                <Border Classes="card" Width="240">
+                    <StackPanel Spacing="4">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Jog" ToolTip.Tip="Joystick and hold-to-move buttons" />
+                            <TextBlock Grid.Column="1" Classes="readout secondary"
+                                       Text="{Binding JogSpeed, StringFormat='{}{0:0} %'}" />
+                        </Grid>
+                        <Slider Minimum="1" Maximum="100" Value="{Binding JogSpeed}" TickFrequency="1" IsSnapToTickEnabled="True" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Preset recall" ToolTip.Tip="Peak speed of eased preset and Home moves" />
+                            <TextBlock Grid.Column="1" Classes="readout secondary"
+                                       Text="{Binding PresetSpeed, StringFormat='{}{0:0} %'}" />
+                        </Grid>
+                        <Slider Minimum="1" Maximum="100" Value="{Binding PresetSpeed}" TickFrequency="1" IsSnapToTickEnabled="True" />
+                        <Button Content="Stop" Command="{Binding StopCommand}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center" IsEnabled="{Binding IsMoving}"
+                                ToolTip.Tip="Stop any movement where the camera is now" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </WrapPanel>
+
+        <!-- Presets -->
+        <StackPanel Spacing="6" IsVisible="{Binding HasAnyAxis}">
+            <TextBlock Classes="sectionHeader" Text="PRESETS" Margin="4,0" />
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="secondary" IsVisible="{Binding HasNoPresets}" TextWrapping="Wrap"
+                               Text="Move the camera, pick what to store and press Save. Click a preset to recall it; right-click for more." />
+                    <ItemsControl ItemsSource="{Binding Presets}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:PresetItemViewModel">
+                                <Panel>
+                                    <Button Classes="preset" Classes.recalling="{Binding IsRecalling}"
+                                            Command="{Binding RecallCommand}" IsVisible="{Binding !IsRenaming}"
+                                            ToolTip.Tip="{Binding Summary}">
+                                        <Button.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Update to Current Position" Command="{Binding UpdateToCurrentCommand}" />
+                                                <MenuItem Header="Rename…" Command="{Binding BeginRenameCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="Move Left" Command="{Binding MoveLeftCommand}" />
+                                                <MenuItem Header="Move Right" Command="{Binding MoveRightCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Classes="caption secondary" Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+                                    <TextBox Width="160" Height="56" VerticalContentAlignment="Center"
+                                             Text="{Binding EditName}" IsVisible="{Binding IsRenaming}"
+                                             AttachedToVisualTree="OnRenameBoxAttached">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding CommitRenameCommand}" />
+                                            <KeyBinding Gesture="Escape" Command="{Binding CancelRenameCommand}" />
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </Panel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Border Height="1" Background="{DynamicResource CardBorder}" />
+
+                    <WrapPanel ItemSpacing="12" LineSpacing="8">
+                        <TextBox Width="200" Text="{Binding NewPresetName}" PlaceholderText="New preset name"
+                                 VerticalAlignment="Center">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding SavePresetCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <TextBlock Classes="secondary" Text="Save:" VerticalAlignment="Center" />
+                        <CheckBox Content="Pan" IsChecked="{Binding SavePan}" IsVisible="{Binding HasPan}" />
+                        <CheckBox Content="Tilt" IsChecked="{Binding SaveTilt}" IsVisible="{Binding HasTilt}" />
+                        <CheckBox Content="Zoom" IsChecked="{Binding SaveZoom}" IsVisible="{Binding HasZoom}" />
+                        <CheckBox Content="Focus" IsChecked="{Binding SaveFocus}" IsVisible="{Binding HasFocus}"
+                                  ToolTip.Tip="Recalling a preset with focus turns autofocus off" />
+                        <Button Content="Save Preset" Command="{Binding SavePresetCommand}" VerticalAlignment="Center" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

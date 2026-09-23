@@ -1,0 +1,70 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UVCControl.App.App"
+             Name="UVC Control"
+             RequestedThemeVariant="Default">
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="14,10" />
+        </Style>
+        <Style Selector="TextBlock.secondary">
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+        </Style>
+        <Style Selector="TextBlock.caption">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style Selector="TextBlock.mono">
+            <Setter Property="FontFamily" Value="{DynamicResource MonospaceFont}" />
+        </Style>
+        <Style Selector="TextBox.mono">
+            <Setter Property="FontFamily" Value="{DynamicResource MonospaceFont}" />
+        </Style>
+        <Style Selector="TextBlock.sectionHeader">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+        </Style>
+        <Style Selector="TextBlock.error">
+            <Setter Property="Foreground" Value="#E5484D" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.badge">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.badge > TextBlock">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Application.Styles>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <FontFamily x:Key="MonospaceFont">Menlo, Consolas, DejaVu Sans Mono, monospace</FontFamily>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CardBorder" Color="#1F000000" />
+                    <SolidColorBrush x:Key="PageBackground" Color="#F3F3F5" />
+                    <SolidColorBrush x:Key="SidebarBackground" Color="#EBEBEE" />
+                    <SolidColorBrush x:Key="BarBackground" Color="#E8FFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="CardBackground" Color="#2A2A2D" />
+                    <SolidColorBrush x:Key="CardBorder" Color="#24FFFFFF" />
+                    <SolidColorBrush x:Key="PageBackground" Color="#1E1E20" />
+                    <SolidColorBrush x:Key="SidebarBackground" Color="#252528" />
+                    <SolidColorBrush x:Key="BarBackground" Color="#E0202022" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

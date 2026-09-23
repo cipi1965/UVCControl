@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UVCControl.App/UVCControl.App.csproj" />
+    <Project Path="src/UVCControl.Core/UVCControl.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/UVCControl.Core.Tests/UVCControl.Core.Tests.csproj" />
+  </Folder>
+</Solution>

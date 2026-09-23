@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UVCControl.App.ViewModels"
+             xmlns:views="using:UVCControl.App.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+             x:Class="UVCControl.App.Views.DeviceView"
+             x:DataType="vm:DeviceViewModel">
+
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="vm:CameraPreviewViewModel">
+            <views:CameraPreviewView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:PtzViewModel">
+            <views:PtzView />
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
+    <UserControl.Styles>
+        <Style Selector="TabControl#Tabs > TabItem">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Padding="16,10" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource CardBorder}">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="caption secondary mono" Text="{Binding VidPid}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                    <ToggleButton Content="Preview" IsChecked="{Binding ShowPreview}"
+                                  ToolTip.Tip="Show a live video preview" />
+                    <ToggleButton Content="Live" IsChecked="{Binding AutoRefresh}"
+                                  ToolTip.Tip="Re-read all values every second" />
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}"
+                            ToolTip.Tip="Re-read every control from the camera" />
+                    <Button Content="Defaults" Command="{Binding ResetDefaultsCommand}"
+                            ToolTip.Tip="Reset every writable absolute control to its default" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Preview -->
+        <Border DockPanel.Dock="Top" Height="340" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardBorder}"
+                IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ContentControl Content="{Binding Preview}" />
+        </Border>
+
+        <TabControl x:Name="Tabs" Padding="0" Margin="8,4,8,0">
+            <TabItem Header="PTZ">
+                <ScrollViewer>
+                    <StackPanel Margin="12,12,12,16" Spacing="16">
+                        <StackPanel IsVisible="{Binding IsLoading}" Spacing="6">
+                            <TextBlock Classes="secondary" Text="Connecting to the camera…" />
+                            <ProgressBar IsIndeterminate="True" />
+                        </StackPanel>
+                        <TextBlock Classes="error" Text="{Binding Error}"
+                                   IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <ContentControl Content="{Binding Ptz}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Advanced">
+                <ScrollViewer>
+                    <StackPanel Margin="12,12,12,16" Spacing="18">
+                        <!-- Device info -->
+                        <Border Classes="card">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Product" />
+                                    <SelectableTextBlock Grid.Column="1" Classes="secondary" Text="{Binding Name}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Vendor / Product ID" />
+                                    <SelectableTextBlock Grid.Column="1" Classes="secondary mono" Text="{Binding VidPid}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="UVC Version" />
+                                    <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding UvcVersion}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock Text="Location" />
+                                    <SelectableTextBlock Grid.Column="1" Classes="secondary mono" Text="{Binding Location}"
+                                                         TextAlignment="Right" TextWrapping="Wrap" Margin="24,0,0,0" />
+                                </Grid>
+                                <TextBlock Classes="error" Text="{Binding Error}"
+                                           IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel IsVisible="{Binding IsLoading}" Spacing="6">
+                            <TextBlock Classes="secondary" Text="Probing controls…" />
+                            <ProgressBar IsIndeterminate="True" />
+                        </StackPanel>
+
+                        <!-- Units -->
+                        <ItemsControl ItemsSource="{Binding Sections}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="18" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:UnitSectionViewModel">
+                                    <StackPanel Spacing="6">
+                                        <Grid ColumnDefinitions="*,Auto" Margin="4,0">
+                                            <TextBlock Classes="sectionHeader" Text="{Binding Header}" />
+                                            <SelectableTextBlock Grid.Column="1" Classes="caption secondary mono" Text="{Binding Guid}"
+                                                                 IsVisible="{Binding Guid, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        </Grid>
+                                        <Border Classes="card">
+                                            <StackPanel>
+                                                <TextBlock Classes="secondary" Text="No controls respond on this unit."
+                                                           IsVisible="{Binding IsEmpty}" />
+                                                <ItemsControl ItemsSource="{Binding Controls}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="vm:ControlViewModel">
+                                                            <views:ControlView />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>
